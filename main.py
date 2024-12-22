@@ -26,6 +26,23 @@ class Client:
         url = f"{self.base_url}{endpoint}"
         logging.info(f"POST URL - {url} - DATA - {data}")
         response = requests.post(url, headers=self.headers, json=data)
+        self._handler_response(response)
+        return response.json()
+    
+    def delete(self, endpoint: str) -> None:
+        url = f"{self.base_url}:{endpoint}"
+        logging.info(f"DELETE - {url}")
+        response = requests.delete(url=url, headers=self.headers)
+        self._handler_response(response)
+    
+    def send_message(
+            self,
+            channel_id: str,
+            content: str
+    ) -> dict:
+        endpoint = f"/channels/{channel_id}/messages"
+        data = {"content": content}
+        return self.post(endpoint, data)
     
     def _handler_response(self, response: requests.Response):
         if not response.ok:
