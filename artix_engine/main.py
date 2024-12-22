@@ -2,6 +2,11 @@ import asyncio
 import json
 import websockets
 import logging
+from typing import (
+    Callable,
+    Dict
+)
+from types import Message
 
 logging.basicConfig(level=logging.INFO)
 
@@ -12,11 +17,19 @@ class Client:
         self.token = token
         self.heartbeat_interval = None
         self.session = None
+        self.event_handlers: Dict[str, Callable] = {}
         self.headers = {
             "Authorization": token,
             "Content-Type": "application/json"
         }
     
+    def handler_events(self, event_name: str):
+        """Handling events"""
+        def decorator(func: Callable):
+            self.event_handlers[event_name] = func
+            logging.info(f"Handler for {event_name} registered.")
+            return func
+        return decorator
     async def connect(self):
         """Connect on gateway."""
         async with websockets.connect(self.gateway_url) as ws:
@@ -56,16 +69,13 @@ class Client:
             await self.session.send(json.dumps({"op": 1, "d": None}))
     
     async def handle_events(self):
-        """Handling events"""
         async for message in self.session:
             event = json.loads(message)
             op = event.get('op')
-            t = event.get('t')
-            d = event.get('d')
+            t = event.get('t')  # Назва події
+            d = event.get('d')  # Дані події
 
-            if op == 0:
-                logging.info(f"Event {t}: {d}")
-                if t == "MESSAGE_CREATE":
-                    content = d['content']
-                    author = d['author']['username']
-                    logging.info(f"new getting message from {author}: {content}")
+            if op == 0 and t in self.event_handlers:
+                handler = self.event_handlers[t]
+                logging.info(f"Handling event {t}")
+                await handler(Message(self, d))

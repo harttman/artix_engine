@@ -1,15 +1,6 @@
-0.0.0-PRE ALPHA;
+0.0.1 ALPHA;
 
 ```py
-import asyncio
-import artix
-
-async def main() -> None:
-    client = artix.Client("Bot TOKEN")
-    await client.connect()
-
-if __name__ == "__main__":
-    asyncio.run(main())
-
+NOT FOUND CASR
 ```
 # LIB USE LOGGINS DEFAULT.
