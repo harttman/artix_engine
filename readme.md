@@ -1,6 +1,6 @@
 0.0.0-PRE ALPHA;
 
-```
+```py
 from main import Client
 
 bot = Client("Bot token")
